@@ -46,30 +46,42 @@ def enroll():
 
 STUDENT = dict(name="Eleanor Whitfield", first="Eleanor", initials="EW", level="Conservatoire Level", enrolled="March 2026")
 ACTIVE_LESSONS = {1, 5, 10}  # all other lessons are greyed out as "Coming soon"
-# (number, title, minutes, instructor, status)
-MODULES = [
-    dict(n=1, title="Foundations of Technique", lessons=[
-        (1, "Posture, Hand Position & Touch", 24, "James Chen", "done"),
-        (2, "Finger Independence & Five-Finger Patterns", 22, "James Chen", "done"),
-        (3, "Rhythm, Pulse & Reading Foundations", 25, "James Chen", "done")]),
-    dict(n=2, title="Scales & Arpeggios", lessons=[
-        (4, "C Major Scale & Hand Crossing", 26, "James Chen", "done"),
-        (5, "G Major Scale & The Fingering Principle", 27, "James Chen", "current"),
-        (6, "D Major & A Minor Scales", 26, "James Chen", "todo"),
-        (7, "Broken Chords & Arpeggios", 28, "James Chen", "todo")]),
-    dict(n=3, title="Repertoire: Debussy", lessons=[
-        (8, "Introduction to Impressionism", 28, "Sophia Laurent", "todo"),
-        (9, "Clair de Lune — Sections A & B", 35, "Sophia Laurent", "todo"),
-        (10, "Clair de Lune — Pedalling & Voicing", 35, "Sophia Laurent", "todo")]),
-    dict(n=4, title="Musicianship", lessons=[
-        (11, "Ear Training & Intervals", 25, "Sophia Laurent", "todo"),
-        (12, "Sight-Reading & Phrasing", 25, "Sophia Laurent", "todo")]),
+_L = [
+    (1, 1, 1, "Hand Posture & The Five-Finger Position", "Establish proper hand curvature, wrist alignment, and the foundational five-finger hand position that underpins all piano technique.", 18, "Dr. Margaret Holloway", "done"),
+    (2, 1, 2, "Reading the Treble Clef", "Learn to identify notes on the treble staff, understand ledger lines, and sight-read simple melodies with confidence.", 22, "Dr. Margaret Holloway", "done"),
+    (3, 1, 3, "Reading the Bass Clef", "Master the bass clef staff, recognise intervals, and coordinate both hands reading simultaneously.", 20, "Dr. Margaret Holloway", "done"),
+    (4, 2, 1, "C Major Scale — One Octave", "Learn the C major scale with correct fingering, thumb-under technique, and even tone production across one octave.", 25, "James Chen", "done"),
+    (5, 2, 2, "G Major Scale & The Fingering Principle", "Apply the fingering principle to G major, understand the F# requirement, and build muscle memory for sharp-key scales.", 27, "James Chen", "current"),
+    (6, 2, 3, "Two-Octave Scales & Tempo", "Extend scales to two octaves, introduce metronome practice at 60–80 BPM, and develop hand coordination.", 30, "James Chen", "todo"),
+    (7, 2, 4, "Broken Chords & Arpeggio Form", "Transition from solid chords to broken chord patterns and introductory arpeggio exercises.", 24, "James Chen", "todo"),
+    (8, 3, 1, "Clair de Lune — Section A", "Begin Debussy’s masterpiece. Focus on the opening theme, rubato phrasing, and the delicate touch required for Impressionist repertoire.", 35, "Sophia Laurent", "todo"),
+    (9, 3, 2, "Clair de Lune — Section B & Voicing", "Tackle the middle section with its rolling arpeggios, melodic voicing, and dynamic control across overlapping harmonies.", 38, "Sophia Laurent", "todo"),
+    (10, 3, 3, "Pedalling Technique for Debussy", "Master half-pedalling, flutter pedalling, and the sustain techniques that give Debussy’s works their characteristic resonance.", 29, "Sophia Laurent", "todo"),
+    (11, 4, 1, "Sight-Reading Strategies", "Develop systematic sight-reading: pre-scan, key identification, rhythmic counting, and the play-through mindset.", 26, "Dr. Margaret Holloway", "todo"),
+    (12, 4, 2, "Aural Training & Interval Recognition", "Train your ear to identify intervals, chord qualities, and cadences — essential skills for AMEB and ABRSM examinations.", 23, "Dr. Margaret Holloway", "todo"),
 ]
-for m in MODULES:
-    m["total"] = len(m["lessons"])
-    m["done"] = sum(1 for l in m["lessons"] if l[4] == "done")
-    m["pct"] = round(100 * m["done"] / m["total"])
-    m["active"] = any(l[0] in ACTIVE_LESSONS for l in m["lessons"])
+LESSONS = [dict(zip(("num", "module", "mlesson", "title", "desc", "minutes", "instructor", "status"), l)) for l in _L]
+MODULE_TITLES = {1: "Foundations of Technique", 2: "Scales & Arpeggios", 3: "Repertoire: Debussy", 4: "Musicianship"}
+MODULES = []
+for n, t in MODULE_TITLES.items():
+    ls = [l for l in LESSONS if l["module"] == n]
+    d = sum(l["status"] == "done" for l in ls)
+    MODULES.append(dict(n=n, title=t, total=len(ls), done=d, pct=round(100 * d / len(ls))))
+for l in LESSONS:
+    l["module_title"] = MODULE_TITLES[l["module"]]
+WEEK = [("Mon", 30), ("Tue", 25), ("Wed", 45), ("Thu", 0), ("Fri", 30), ("Sat", 15), ("Sun", 0)]
+SKILLS = [("Technique", 82), ("Sight-Reading", 64), ("Repertoire", 38), ("Aural Skills", 55), ("Theory", 71)]
+NOTIFICATIONS = [
+    dict(id="n1", title="Live lesson on Thursday", text="Your session with Sophia Laurent starts at 7:00 AM.", time="Today"),
+    dict(id="n2", title="New feedback from James Chen", text="Notes for G Major Scale & The Fingering Principle are ready.", time="Yesterday"),
+    dict(id="n3", title="35 minutes to your weekly goal", text="You’re at 145 of 180 practice minutes this week.", time="Yesterday"),
+    dict(id="n4", title="Welcome to the NMA Portal", text="Explore your lessons and track your progress here.", time="3 days ago"),
+]
+
+
+@app.context_processor
+def inject_notifications():
+    return dict(notifications=NOTIFICATIONS)
 
 
 def login_required(view):
@@ -102,23 +114,27 @@ def logout():
 @app.route("/portal/dashboard")
 @login_required
 def portal_dashboard():
-    lessons = [l for m in MODULES for l in m["lessons"]]
-    current = next(l for l in lessons if l[4] == "current")
-    done = sum(1 for l in lessons if l[4] == "done")
+    current = next(l for l in LESSONS if l["status"] == "current")
+    done = sum(l["status"] == "done" for l in LESSONS)
     return render_template("dashboard.html", student=STUDENT, modules=MODULES, current=current,
-                           done=done, total=len(lessons), pct=round(100 * done / len(lessons)))
+                           done=done, total=len(LESSONS), pct=round(100 * done / len(LESSONS)))
 
 
 @app.route("/portal/lessons")
 @login_required
 def portal_lessons():
-    return render_template("lessons.html", student=STUDENT, modules=MODULES, active=ACTIVE_LESSONS)
+    done = sum(l["status"] == "done" for l in LESSONS)
+    return render_template("lessons.html", student=STUDENT, lessons=LESSONS, modules=MODULES,
+                           active=ACTIVE_LESSONS, done=done)
 
 
 @app.route("/portal/progress")
 @login_required
 def portal_progress():
-    return render_template("placeholder.html", student=STUDENT, title="Progress")
+    done = sum(l["status"] == "done" for l in LESSONS)
+    return render_template("progress.html", student=STUDENT, lessons=LESSONS, week=WEEK, skills=SKILLS,
+                           done=done, total=len(LESSONS), pct=round(100 * done / len(LESSONS)),
+                           week_total=sum(m for _, m in WEEK))
 
 
 if __name__ == "__main__":

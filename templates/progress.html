@@ -1,0 +1,72 @@
+{% extends "portal_base.html" %}
+{% from "_macros.html" import icon, bar %}
+{% set page_title = 'Progress' %}
+{% block content %}
+<div class="space-y-6">
+  <div><h1 class="font-serif text-3xl text-[var(--maroon-deep)]">Your Progress</h1><p class="mt-1 text-sm text-muted-foreground">Track your development across skills, practice, and curriculum.</p></div>
+
+  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="rounded-lg border border-[var(--border)] bg-card p-5 shadow-card"><div class="flex items-center gap-2">{{ icon('trending', 'h-4 w-4 text-[var(--maroon-light)]') }}<p class="text-xs uppercase tracking-wider text-muted-foreground">Course Completion</p></div><p class="mt-2 font-serif text-3xl text-[var(--maroon-deep)]">{{ pct }}%</p>{{ bar(pct) }}</div>
+    <div class="rounded-lg border border-[var(--border)] bg-card p-5 shadow-card"><div class="flex items-center gap-2">{{ icon('clock', 'h-4 w-4 text-[var(--maroon-light)]') }}<p class="text-xs uppercase tracking-wider text-muted-foreground">Practice This Week</p></div><p class="mt-2 font-serif text-3xl text-[var(--maroon-deep)]">{{ week_total }}m</p>{{ bar(81) }}</div>
+    <div class="soon-block rounded-lg"><div class="h-full rounded-lg border border-[var(--border)] bg-card p-5 shadow-card"><div class="flex items-center gap-2">{{ icon('flame', 'h-4 w-4 text-[var(--maroon-light)]') }}<p class="text-xs uppercase tracking-wider text-muted-foreground">Current Streak</p></div><p class="mt-2 font-serif text-3xl text-[var(--maroon-deep)]">6</p><p class="mt-1 text-xs text-muted-foreground">days</p></div></div>
+    <div class="soon-block rounded-lg"><div class="h-full rounded-lg border border-[var(--border)] bg-card p-5 shadow-card"><div class="flex items-center gap-2">{{ icon('award', 'h-4 w-4 text-[var(--maroon-light)]') }}<p class="text-xs uppercase tracking-wider text-muted-foreground">Longest Streak</p></div><p class="mt-2 font-serif text-3xl text-[var(--maroon-deep)]">14</p><p class="mt-1 text-xs text-muted-foreground">days</p></div></div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="rounded-lg border border-[var(--border)] bg-card p-6 shadow-card">
+      <h2 class="mb-4 font-serif text-xl text-[var(--maroon-deep)]">Weekly Practice Minutes</h2>
+      <svg viewBox="0 0 400 260" class="h-[260px] w-full" role="img" aria-label="Weekly practice minutes">
+        {% for k in range(5) %}{% set y = 225 - k * 55 %}
+        <line x1="40" x2="395" y1="{{ y }}" y2="{{ y }}" stroke="var(--border)" stroke-dasharray="3 3"/>
+        <text x="32" y="{{ y + 4 }}" text-anchor="end" font-size="12" fill="var(--muted)">{{ k * 15 }}</text>
+        {% endfor %}
+        {% for day, v in week %}{% set x = 40 + loop.index0 * 50 + 12 %}{% set top = (225 - v * 220 / 60)|round(1) %}
+        <text x="{{ x + 12.5 }}" y="245" text-anchor="middle" font-size="12" fill="var(--muted)">{{ day }}</text>
+        {% if v %}<path d="M{{ x }},225 V{{ top + 6 }} a6,6 0 0 1 6,-6 h13 a6,6 0 0 1 6,6 V225 Z" fill="var(--maroon)"><title>{{ day }}: {{ v }} min</title></path>{% endif %}
+        {% endfor %}
+      </svg>
+    </div>
+
+    <div class="soon-block rounded-lg"><div class="h-full rounded-lg border border-[var(--border)] bg-card p-6 shadow-card">
+      <h2 class="mb-4 font-serif text-xl text-[var(--maroon-deep)]">Skill Assessment</h2>
+      <svg viewBox="-30 0 356 260" class="h-[260px] w-full" role="img" aria-label="Skill assessment radar">
+        <g stroke="var(--border)" fill="none">
+          <path d="M148,130L148,30M148,130L243.1,99.1M148,130L206.8,210.9M148,130L89.2,210.9M148,130L52.9,99.1"/>
+          <path d="M148,105L171.8,122.3L162.7,150.2L133.3,150.2L124.2,122.3Z"/>
+          <path d="M148,80L195.6,114.5L177.4,170.5L118.6,170.5L100.4,114.5Z"/>
+          <path d="M148,55L219.3,106.8L192.1,190.7L103.9,190.7L76.7,106.8Z"/>
+          <path d="M148,30L243.1,99.1L206.8,210.9L89.2,210.9L52.9,99.1Z"/>
+        </g>
+        <g font-size="12" fill="var(--muted)">
+          <text x="148" y="22" text-anchor="middle">Technique</text><text x="250.7" y="96.6">Sight-Reading</text>
+          <text x="211.5" y="217.4">Repertoire</text><text x="84.5" y="217.4" text-anchor="end">Aural Skills</text><text x="45.3" y="96.6" text-anchor="end">Theory</text>
+        </g>
+        <path d="M148,48L208.9,110.2L170.3,160.7L115.7,174.5L80.5,108.1Z" fill="var(--maroon)" fill-opacity=".25" stroke="var(--maroon)" stroke-width="2"/>
+      </svg>
+    </div></div>
+
+    <div class="soon-block rounded-lg"><div class="h-full rounded-lg border border-[var(--border)] bg-card p-6 shadow-card">
+      <h2 class="mb-4 font-serif text-xl text-[var(--maroon-deep)]">Skill Breakdown</h2>
+      <div class="space-y-4">
+      {% for name, v in skills %}
+        <div><div class="mb-1.5 flex items-center justify-between"><span class="text-sm font-medium text-[var(--maroon-deep)]">{{ name }}</span><span class="text-sm text-muted-foreground">{{ v }}%</span></div>
+        <div class="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]"><div class="h-full rounded-full bg-[var(--maroon)]" style="width:{{ v }}%"></div></div></div>
+      {% endfor %}
+      </div>
+    </div></div>
+
+    <div class="soon-block rounded-lg"><div class="h-full rounded-lg border border-[var(--border)] bg-card p-6 shadow-card">
+      <h2 class="mb-4 font-serif text-xl text-[var(--maroon-deep)]">Lesson Completion Log</h2>
+      <div class="space-y-2">
+      {% for l in lessons %}{% set d = l.status == 'done' %}
+        <div class="flex items-center gap-3 border-b border-[var(--border)] py-2.5 last:border-0">
+          <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs {{ 'bg-[var(--gold)] text-[var(--maroon-deep)]' if d else 'bg-[var(--secondary)] text-muted-foreground' }}">{{ '✓' if d else l.mlesson }}</div>
+          <div class="flex-1"><p class="text-sm {{ 'font-medium text-[var(--maroon-deep)]' if d else 'text-muted-foreground' }}">{{ l.title }}</p><p class="text-xs text-muted-foreground">{{ l.module_title }} · {{ l.minutes }} min</p></div>
+          <span class="text-xs {{ 'text-[var(--maroon)]' if d else 'text-muted-foreground' }}">{{ 'Completed' if d else ('In Progress' if l.status == 'current' else 'Locked') }}</span>
+        </div>
+      {% endfor %}
+      </div>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

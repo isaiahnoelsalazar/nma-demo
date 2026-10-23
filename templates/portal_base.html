@@ -23,10 +23,39 @@
   <div class="lg:pl-64">
     <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-4 backdrop-blur-md lg:px-8">
       <div class="flex items-center gap-3"><button id="side-btn" class="text-[var(--maroon-deep)] lg:hidden" aria-label="Toggle menu">{{ icon('menu', 'h-5 w-5') }}</button><span class="font-serif text-xl text-[var(--maroon-deep)]">{{ page_title }}</span></div>
-      <div class="flex items-center gap-3"><span class="relative text-[var(--maroon-deep)]/60">{{ icon('bell', 'h-5 w-5') }}<span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--gold)]"></span></span><div class="flex h-8 w-8 items-center justify-center rounded-full bg-gold-gradient text-xs font-semibold text-[var(--maroon-deep)]">{{ student.initials }}</div></div>
+      <div class="flex items-center gap-3"><div class="relative" id="notif">
+        <button type="button" id="notif-btn" class="relative text-[var(--maroon-deep)]/60 hover:text-[var(--maroon-deep)]" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">{{ icon('bell', 'h-5 w-5') }}<span id="notif-dot" class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--gold)]"></span></button>
+        <div id="notif-panel" class="absolute right-0 z-50 mt-3 hidden w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[var(--border)] bg-card shadow-elegant">
+          <div class="flex items-center justify-between border-b border-[var(--border)] px-4 py-3"><span class="font-serif text-lg text-[var(--maroon-deep)]">Notifications</span><button type="button" id="notif-all" class="text-xs text-[var(--maroon-light)] hover:underline">Mark all as read</button></div>
+          <div class="max-h-96 overflow-y-auto">
+          {% for n in notifications %}
+            <button type="button" data-id="{{ n.id }}" data-unread="1" class="flex w-full gap-3 border-b border-[var(--border)] px-4 py-3 text-left last:border-0 hover:bg-[var(--secondary)]"><span class="n-dot mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--gold)]"></span><span><span class="block text-sm font-medium text-[var(--maroon-deep)]">{{ n.title }}</span><span class="block text-xs text-muted-foreground">{{ n.text }}</span><span class="mt-1 block text-[11px] text-muted-foreground">{{ n.time }}</span></span></button>
+          {% endfor %}
+          </div>
+        </div>
+      </div><div class="flex h-8 w-8 items-center justify-center rounded-full bg-gold-gradient text-xs font-semibold text-[var(--maroon-deep)]">{{ student.initials }}</div></div>
     </header>
     <main class="p-4 lg:p-8">{% block content %}{% endblock %}</main>
   </div>
 </div>
 {% endblock %}
-{% block scripts %}<script>document.getElementById('side-btn').onclick=()=>{const a=document.getElementById('sidebar');a.classList.toggle('hidden');a.classList.toggle('flex')}</script>{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('side-btn').onclick=()=>{const a=document.getElementById('sidebar');a.classList.toggle('hidden');a.classList.toggle('flex')};
+(function(){
+  const btn=document.getElementById('notif-btn'),panel=document.getElementById('notif-panel'),dot=document.getElementById('notif-dot'),
+        items=[...panel.querySelectorAll('[data-id]')];
+  let read=[];try{read=JSON.parse(localStorage.getItem('nma_read')||'[]')}catch(e){}
+  const save=()=>{try{localStorage.setItem('nma_read',JSON.stringify(read))}catch(e){}};
+  const paint=()=>{let n=0;items.forEach(i=>{const u=!read.includes(i.dataset.id);i.dataset.unread=u?'1':'0';n+=u});dot.classList.toggle('hidden',!n)};
+  const close=()=>{panel.classList.add('hidden');btn.setAttribute('aria-expanded','false')};
+  btn.onclick=e=>{e.stopPropagation();const hidden=panel.classList.toggle('hidden');btn.setAttribute('aria-expanded',String(!hidden))};
+  items.forEach(i=>i.onclick=()=>{if(!read.includes(i.dataset.id))read.push(i.dataset.id);save();paint()});
+  document.getElementById('notif-all').onclick=()=>{read=items.map(i=>i.dataset.id);save();paint()};
+  document.addEventListener('click',e=>{if(!panel.contains(e.target))close()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  paint();
+})();
+</script>
+{% block page_scripts %}{% endblock %}
+{% endblock %}
