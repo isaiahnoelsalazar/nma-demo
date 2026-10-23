@@ -1,0 +1,22 @@
+{% extends "portal_base.html" %}
+{% from "_macros.html" import icon, bar %}
+{% set page_title = 'Lessons' %}
+{% block content %}
+<div class="space-y-8">
+{% for m in modules %}
+  <section class="{{ '' if m.active else 'soon-block' }}"><div>
+    <div class="mb-3 flex items-end justify-between"><div><p class="text-xs uppercase tracking-wider text-[var(--maroon-light)]">Module {{ m.n }}</p><h2 class="font-serif text-2xl text-[var(--maroon-deep)]">{{ m.title }}</h2></div><span class="text-xs text-muted-foreground">{{ m.done }}/{{ m.total }}</span></div>
+    <div class="space-y-3">
+    {% for num, title, mins, who, status in m.lessons %}{% set on = num in active %}
+      <div class="{{ '' if on else 'soon-block' }}"><div class="flex items-center gap-4 rounded-lg border border-[var(--border)] bg-card p-4 shadow-card">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--maroon)]/10 font-serif text-lg text-[var(--maroon-deep)]">{{ num }}</div>
+        <div class="flex-1"><p class="text-sm font-medium text-[var(--maroon-deep)]">{{ title }}</p><p class="text-xs text-muted-foreground">{{ who }} · {{ mins }} min</p></div>
+        {% if status == 'done' %}<span class="text-xs font-semibold uppercase tracking-wider text-[var(--maroon-light)]">Completed</span>
+        {% elif status == 'current' %}<span class="rounded-full bg-gold-gradient px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--maroon-deep)]">Resume</span>
+        {% else %}<span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ 'Start' if on else 'Locked' }}</span>{% endif %}
+      </div></div>
+    {% endfor %}</div>
+  </div></section>
+{% endfor %}
+</div>
+{% endblock %}

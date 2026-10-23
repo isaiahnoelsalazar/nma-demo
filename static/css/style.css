@@ -17,3 +17,8 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--background);color:v
 .faq-a{display:none;padding-bottom:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6}.open .faq-a{display:block}.open svg{transform:rotate(180deg)}
 .keys{background:repeating-linear-gradient(90deg,#faf4e8 0 28px,#222 28px 30px)}
 .pattern{background-image:repeating-linear-gradient(90deg,transparent 0 20px,#f0d78c 20px 22px,transparent 22px 28px)}
+
+.soon-block{position:relative;cursor:not-allowed}
+.soon-block>*{filter:grayscale(1);opacity:.5;pointer-events:none}
+.soon-block::after{content:"Coming soon";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#222;color:#fff;font-size:11px;letter-spacing:.05em;text-transform:none;padding:4px 10px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;z-index:60}
+.soon-block:hover::after{opacity:1}

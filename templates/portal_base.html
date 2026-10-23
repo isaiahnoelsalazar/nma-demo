@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% set nav = [('Dashboard','dashboard','portal_dashboard'),('Lessons','book','portal_lessons'),('Progress','trending','portal_progress'),('Practice','calendar',None),('Messages','message',None)] %}
+{% block title %}{{ page_title }} — NMA Portal{% endblock %}
+{% block body %}
+<div class="min-h-screen bg-[var(--background)]">
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-maroon-gradient lg:flex">
+    <div class="flex h-20 items-center gap-3 px-6"><div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold-gradient">{{ icon('music', 'h-5 w-5 text-[var(--maroon-deep)]') }}</div><span class="font-serif text-lg text-[var(--gold-light)]">NMA Portal</span></div>
+    <nav class="flex-1 space-y-1 px-3 py-4">
+      {% for label, ico, ep in nav %}
+        {% if ep %}
+        <a href="{{ url_for(ep) }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ 'bg-[var(--gold)]/15 text-[var(--gold-light)]' if request.endpoint == ep else 'float-glow hover:bg-white/5' }}">{{ icon(ico, 'h-4 w-4') }}{{ label }}</a>
+        {% else %}
+        <span class="soon flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium">{{ icon(ico, 'h-4 w-4') }}{{ label }}</span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+    <div class="border-t border-[var(--gold)]/15 p-4">
+      <div class="flex items-center gap-3 px-2 py-2"><div class="flex h-9 w-9 items-center justify-center rounded-full bg-gold-gradient text-sm font-semibold text-[var(--maroon-deep)]">{{ student.initials }}</div><div class="flex-1 overflow-hidden"><p class="truncate text-sm font-medium text-[var(--cream)]">{{ student.name }}</p><p class="truncate text-xs text-[var(--cream)]/50">{{ student.level }}</p></div></div>
+      <a href="{{ url_for('logout') }}" class="float-glow mt-2 flex w-full items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium hover:bg-white/5">{{ icon('logout', 'mr-2 h-4 w-4') }}Sign Out</a>
+    </div>
+  </aside>
+  <div class="lg:pl-64">
+    <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-4 backdrop-blur-md lg:px-8">
+      <div class="flex items-center gap-3"><button id="side-btn" class="text-[var(--maroon-deep)] lg:hidden" aria-label="Toggle menu">{{ icon('menu', 'h-5 w-5') }}</button><span class="font-serif text-xl text-[var(--maroon-deep)]">{{ page_title }}</span></div>
+      <div class="flex items-center gap-3"><span class="relative text-[var(--maroon-deep)]/60">{{ icon('bell', 'h-5 w-5') }}<span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--gold)]"></span></span><div class="flex h-8 w-8 items-center justify-center rounded-full bg-gold-gradient text-xs font-semibold text-[var(--maroon-deep)]">{{ student.initials }}</div></div>
+    </header>
+    <main class="p-4 lg:p-8">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>document.getElementById('side-btn').onclick=()=>{const a=document.getElementById('sidebar');a.classList.toggle('hidden');a.classList.toggle('flex')}</script>{% endblock %}

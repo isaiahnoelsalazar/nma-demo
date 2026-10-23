@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from functools import wraps
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
@@ -43,13 +44,81 @@ def enroll():
     return redirect(url_for("index") + "#enroll")
 
 
+STUDENT = dict(name="Eleanor Whitfield", first="Eleanor", initials="EW", level="Conservatoire Level", enrolled="March 2026")
+ACTIVE_LESSONS = {1, 5, 10}  # all other lessons are greyed out as "Coming soon"
+# (number, title, minutes, instructor, status)
+MODULES = [
+    dict(n=1, title="Foundations of Technique", lessons=[
+        (1, "Posture, Hand Position & Touch", 24, "James Chen", "done"),
+        (2, "Finger Independence & Five-Finger Patterns", 22, "James Chen", "done"),
+        (3, "Rhythm, Pulse & Reading Foundations", 25, "James Chen", "done")]),
+    dict(n=2, title="Scales & Arpeggios", lessons=[
+        (4, "C Major Scale & Hand Crossing", 26, "James Chen", "done"),
+        (5, "G Major Scale & The Fingering Principle", 27, "James Chen", "current"),
+        (6, "D Major & A Minor Scales", 26, "James Chen", "todo"),
+        (7, "Broken Chords & Arpeggios", 28, "James Chen", "todo")]),
+    dict(n=3, title="Repertoire: Debussy", lessons=[
+        (8, "Introduction to Impressionism", 28, "Sophia Laurent", "todo"),
+        (9, "Clair de Lune — Sections A & B", 35, "Sophia Laurent", "todo"),
+        (10, "Clair de Lune — Pedalling & Voicing", 35, "Sophia Laurent", "todo")]),
+    dict(n=4, title="Musicianship", lessons=[
+        (11, "Ear Training & Intervals", 25, "Sophia Laurent", "todo"),
+        (12, "Sight-Reading & Phrasing", 25, "Sophia Laurent", "todo")]),
+]
+for m in MODULES:
+    m["total"] = len(m["lessons"])
+    m["done"] = sum(1 for l in m["lessons"] if l[4] == "done")
+    m["pct"] = round(100 * m["done"] / m["total"])
+    m["active"] = any(l[0] in ACTIVE_LESSONS for l in m["lessons"])
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped(*a, **kw):
+        if not session.get("user"):
+            return redirect(url_for("login"))
+        return view(*a, **kw)
+    return wrapped
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if session.get("user"):
+        return redirect(url_for("portal_dashboard"))
     if request.method == "POST":
-        # TODO: authenticate request.form["email"] / ["password"], then redirect to the dashboard
-        flash("Student portal coming soon.", "info")
-        return redirect(url_for("login"))
+        # TODO: replace with real authentication (check request.form["email"] / ["password"]).
+        # For now ANY credentials sign in as the demo student below.
+        session["user"] = STUDENT["name"]
+        return redirect(url_for("portal_dashboard"))
     return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("index"))
+
+
+@app.route("/portal/dashboard")
+@login_required
+def portal_dashboard():
+    lessons = [l for m in MODULES for l in m["lessons"]]
+    current = next(l for l in lessons if l[4] == "current")
+    done = sum(1 for l in lessons if l[4] == "done")
+    return render_template("dashboard.html", student=STUDENT, modules=MODULES, current=current,
+                           done=done, total=len(lessons), pct=round(100 * done / len(lessons)))
+
+
+@app.route("/portal/lessons")
+@login_required
+def portal_lessons():
+    return render_template("lessons.html", student=STUDENT, modules=MODULES, active=ACTIVE_LESSONS)
+
+
+@app.route("/portal/progress")
+@login_required
+def portal_progress():
+    return render_template("placeholder.html", student=STUDENT, title="Progress")
 
 
 if __name__ == "__main__":
