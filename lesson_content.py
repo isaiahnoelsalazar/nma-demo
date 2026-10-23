@@ -45,8 +45,8 @@ LESSON_CONTENT = {
                 sec("Kangaroo Hop Drill", [
                     "**Objective:** Play the group of 2 black notes using **fingers 2 and 3**, starting from the low end of the keyboard and ascending higher.",
                     "Practice separately with Right Hand and Left Hand."]),
-                sec("Right Hand - Kangaroo Hop", **media("Demonstrates Right Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard.", "/static/media/lesson1/right-kangaroo-hop.mp4")),
-                sec("Left Hand - Kangaroo Hop", **media("Demonstrates Left Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard.", "/static/media/lesson1/left-kangaroo-hop.mp4")),
+                sec("Right Hand - Kangaroo Hop", **media("/static/media/lesson1/right-kangaroo-hop.mp4")),
+                sec("Left Hand - Kangaroo Hop", **media("/static/media/lesson1/left-kangaroo-hop.mp4")),
                 sec("Three-Legged Kangaroo Drill", [
                     "**Objective:** Play the group of 3 black notes using **fingers 2, 3, and 4**, starting low and ascending higher.",
                     "Practice separately with Right Hand and Left Hand."]),
