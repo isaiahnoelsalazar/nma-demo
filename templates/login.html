@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Student Login — National Music Academy{% endblock %}
+{% block body %}
+<div class="flex min-h-screen">
+  <div class="relative hidden w-1/2 flex-col justify-between bg-maroon-gradient p-12 lg:flex">
+    <div class="pattern absolute inset-0 opacity-[0.07]"></div>
+    <div class="relative"><div class="flex items-center gap-3">
+      <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-gold-gradient">{{ icon('music', 'h-6 w-6 text-[var(--maroon-deep)]') }}</div>
+      <span class="font-serif text-xl text-[var(--gold-light)]">National Music Academy</span></div></div>
+    <div class="relative">
+      <h1 class="font-serif text-5xl leading-tight text-[var(--cream)]">Continue your<br><span class="text-gradient-gold">musical journey</span></h1>
+      <p class="mt-4 max-w-md text-[var(--cream)]/70">Access your personalised curriculum, track your progress, and connect with your instructors — all in one place.</p>
+    </div>
+    <p class="float-glow relative text-xs">© 2026 National Music Academy, Australia</p>
+  </div>
+  <div class="flex w-full items-center justify-center p-8 lg:w-1/2">
+    <div class="w-full max-w-sm">
+      <div class="mb-8 lg:hidden"><div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient">{{ icon('music', 'h-5 w-5 text-[var(--maroon-deep)]') }}</div>
+        <span class="font-serif text-lg text-[var(--maroon-deep)]">National Music Academy</span></div></div>
+      <h2 class="font-serif text-3xl text-[var(--maroon-deep)]">Welcome back</h2>
+      <p class="mt-1 text-sm text-muted-foreground">Sign in to access your student portal</p>
+      <form class="mt-8 space-y-5" method="post" action="{{ url_for('login') }}">
+        <div class="space-y-2">
+          <label class="text-sm font-medium leading-none text-[var(--maroon-deep)]" for="email">Email address</label>
+          <div class="relative">{{ icon('mail', 'absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground') }}
+            <input type="email" class="inp pl-10" id="email" name="email" placeholder="eleanor@example.com" required></div></div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-medium leading-none text-[var(--maroon-deep)]" for="password">Password</label>
+            <a href="#" class="text-xs text-[var(--maroon-light)] hover:underline">Forgot password?</a></div>
+          <div class="relative">{{ icon('lock', 'absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground') }}
+            <input type="password" class="inp pl-10" id="password" name="password" placeholder="••••••••" required></div></div>
+        <button type="submit" class="inline-flex w-full items-center justify-center rounded-md bg-[var(--maroon)] py-4 text-base font-semibold uppercase tracking-wider text-white transition-all hover:bg-[var(--maroon-deep)]">Sign In {{ icon('arrow', 'ml-2 h-4 w-4') }}</button>
+      </form>
+      <p class="mt-6 text-center text-xs text-muted-foreground">New student? <a href="{{ url_for('index') }}" class="font-medium text-[var(--maroon-light)] hover:underline">Enrol in a course</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

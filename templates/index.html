@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, enroll_form %}
+{% block body %}
+<header class="fixed inset-x-0 top-0 z-50 border-b-2 border-[var(--gold)]/40 bg-maroon-gradient shadow-elegant">
+  <div class="container flex h-20 items-center justify-between">
+    <a href="#" class="font-serif text-2xl text-[var(--gold-light)]">National Music Academy</a>
+    <nav class="hidden items-center gap-8 text-sm font-medium uppercase tracking-wider md:flex">
+      <span class="soon">Curriculum</span><span class="soon">Instructors</span>
+      <a href="#pricing" class="glow">Pricing</a><a href="#testimonials" class="glow">Testimonials</a><a href="#faq" class="glow">FAQ</a>
+    </nav>
+    <a href="{{ url_for('login') }}" class="hidden rounded-full bg-gold-gradient px-6 py-2.5 text-sm font-semibold uppercase tracking-wider text-[var(--maroon-deep)] transition-transform hover:scale-105 md:inline-block">Student Login</a>
+    <button id="menu-btn" class="text-[var(--cream)] md:hidden" aria-label="Toggle menu">{{ icon('menu', 'h-6 w-6') }}</button>
+  </div>
+  <div id="mobile-menu" class="hidden border-t border-[var(--gold)]/15 bg-[var(--maroon-deep)] px-6 py-4 md:hidden">
+    <div class="flex flex-col gap-4 text-sm font-medium uppercase tracking-wider">
+      <span class="soon self-start">Curriculum</span><span class="soon self-start">Instructors</span>
+      <a href="#pricing" class="glow">Pricing</a><a href="#testimonials" class="glow">Testimonials</a><a href="#faq" class="glow">FAQ</a>
+      <a href="{{ url_for('login') }}" class="glow">Student Login</a></div>
+  </div>
+</header>
+
+<main>
+<section id="enroll" class="relative overflow-hidden bg-maroon-gradient pb-20 pt-32">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.07]"><div class="absolute -right-20 top-20 h-96 w-96 rounded-full bg-[var(--gold)] blur-3xl"></div><div class="absolute -left-20 bottom-0 h-96 w-96 rounded-full bg-[var(--gold)] blur-3xl"></div></div>
+  <div class="container relative"><div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+    <div class="text-center lg:text-left">
+      <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-4 py-1.5">{{ icon('star', 'h-4 w-4 fill-[var(--gold)] text-[var(--gold)]') }}<span class="text-xs font-semibold uppercase tracking-wider text-[var(--gold-light)]">Rated 4.9/5 by 1,400+ students</span></div>
+      <h1 class="font-serif text-5xl leading-tight text-[var(--cream)] md:text-6xl lg:text-7xl">Learn to play piano with<span class="block text-gradient-gold">Australia’s finest</span></h1>
+      <p class="mx-auto mt-6 max-w-lg text-lg leading-relaxed text-amber-50 lg:mx-0">Live one-on-one online piano lessons from ARIA-nominated instructors. Structured curriculum, flexible scheduling, and a first lesson completely free.</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-6 lg:justify-start">
+        <div class="flex items-center gap-2 text-sm text-amber-50">{{ icon('shield', 'h-5 w-5 text-[var(--gold)]') }}No lock-in contracts</div>
+        <div class="flex items-center gap-2 text-sm text-amber-50">{{ icon('clock', 'h-5 w-5 text-[var(--gold)]') }}Reschedule anytime</div></div>
+      {# Replace with: <img src="{{ url_for('static', filename='img/hero.png') }}" ...> #}
+      <div class="keys mt-10 hidden h-56 w-full rounded-2xl border border-[var(--gold)]/20 shadow-elegant lg:block" role="img" aria-label="Piano keys"></div>
+    </div>
+    <div class="relative mx-auto w-full max-w-md">
+      <div class="keys mb-4 h-40 w-full rounded-2xl lg:hidden" role="img" aria-label="Piano keys"></div>
+      <div class="rounded-2xl border border-[var(--gold)]/20 bg-[var(--cream)] p-6 shadow-elegant sm:p-8">
+        <div class="mb-5 text-center"><p class="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--maroon-light)]">Enroll Now</p><h3 class="mt-1 font-serif text-2xl text-[var(--maroon-deep)]">Claim Your First Lesson Free</h3><p class="mt-1 text-sm text-muted-foreground">No card required. Limited spots this term.</p></div>
+        {{ enroll_form('hero') }}</div>
+    </div>
+  </div></div>
+</section>
+
+<section class="border-b border-[var(--gold)]/15 bg-[var(--maroon-deep)] py-8"><div class="container text-amber-50"><div class="grid grid-cols-2 gap-6 md:grid-cols-4">
+  {% for ico, val, lbl in stats %}
+  <div class="flex flex-col items-center text-center md:flex-row md:gap-4 md:text-left">{{ icon(ico, 'mb-2 h-8 w-8 text-[var(--gold)] md:mb-0') }}<div><div class="font-serif text-2xl text-[var(--gold-light)]">{{ val }}</div><div class="text-xs uppercase tracking-wider text-[var(--cream)]/70">{{ lbl }}</div></div></div>
+  {% endfor %}</div></div></section>
+
+<section class="bg-background py-24"><div class="container">
+  <div class="mx-auto mb-16 max-w-2xl text-center"><p class="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--maroon-light)]">Why Students Choose Us</p><h2 class="mt-3 font-serif text-4xl text-[var(--maroon-deep)] md:text-5xl">A piano education worthy of your ambition</h2><p class="mt-4 text-lg text-muted-foreground">We’ve refined our method over 25 years to remove every barrier between you and the music you want to play.</p></div>
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+  {% for ico, title, text in why %}
+  <div class="group rounded-2xl border border-[var(--border)] bg-card p-8 shadow-card transition-all hover:-translate-y-1 hover:shadow-elegant"><div class="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-[var(--maroon)] transition-colors group-hover:bg-[var(--maroon-deep)]">{{ icon(ico, 'h-7 w-7 text-[var(--gold-light)]') }}</div><h3 class="mb-3 font-serif text-xl text-[var(--maroon-deep)]">{{ title }}</h3><p class="text-sm leading-relaxed text-muted-foreground">{{ text }}</p></div>
+  {% endfor %}</div></div></section>
+
+<section class="bg-[var(--cream)] py-24"><div class="container">
+  <div class="mx-auto mb-16 max-w-2xl text-center"><p class="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--maroon-light)]">How It Works</p><h2 class="mt-3 font-serif text-4xl text-[var(--maroon-deep)] md:text-5xl">From enrolment to your first melody in days</h2></div>
+  <div class="relative grid grid-cols-1 gap-8 md:grid-cols-3"><div class="absolute left-0 right-0 top-12 hidden h-px bg-[var(--gold)]/30 md:block"></div>
+  {% for ico, n, title, text in steps %}
+  <div class="relative text-center"><div class="relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full border-2 border-[var(--gold)] bg-[var(--cream)]">{{ icon(ico, 'h-10 w-10 text-[var(--maroon)]') }}<span class="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--maroon)] text-xs font-bold text-[var(--gold-light)]">{{ n }}</span></div><h3 class="mb-3 font-serif text-2xl text-[var(--maroon-deep)]">{{ title }}</h3><p class="mx-auto max-w-xs text-sm leading-relaxed text-muted-foreground">{{ text }}</p></div>
+  {% endfor %}</div></div></section>
+
+<section id="testimonials" class="bg-background py-24"><div class="container">
+  <div class="mx-auto mb-16 max-w-2xl text-center"><p class="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--maroon-light)]">Student Stories</p><h2 class="mt-3 font-serif text-4xl text-[var(--maroon-deep)] md:text-5xl">Real students. Real progress.</h2>
+    <div class="mt-4 flex items-center justify-center gap-2"><div class="flex">{% for _ in range(5) %}{{ icon('star', 'h-5 w-5 fill-[var(--gold)] text-[var(--gold)]') }}{% endfor %}</div><span class="text-sm text-muted-foreground">4.9/5 from 1,400+ verified reviews</span></div></div>
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+  {% for quote, name, role in testimonials %}
+  <figure class="flex flex-col rounded-2xl border border-[var(--border)] bg-card p-8 shadow-card">{{ icon('quote', 'mb-4 h-8 w-8 text-[var(--gold)]') }}<blockquote class="flex-1 font-serif text-lg italic leading-relaxed text-[var(--maroon-deep)]">“{{ quote }}”</blockquote><figcaption class="mt-6 border-t border-[var(--border)] pt-4"><div class="font-semibold text-[var(--maroon-deep)]">{{ name }}</div><div class="text-xs uppercase tracking-wider text-muted-foreground">{{ role }}</div></figcaption></figure>
+  {% endfor %}</div></div></section>
+
+<section id="pricing" class="bg-[var(--cream)] py-24"><div class="container">
+  <div class="mx-auto mb-16 max-w-2xl text-center"><p class="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--maroon-light)]">Tuition &amp; Pricing</p><h2 class="mt-3 font-serif text-4xl text-[var(--maroon-deep)] md:text-5xl">Transparent tuition, no lock-in</h2><p class="mt-4 text-lg text-muted-foreground">Every plan includes your first lesson free. Cancel anytime — no contracts, no hidden fees.</p></div>
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+  {% for p in plans %}{% set f = p.featured %}
+  <div class="relative flex flex-col rounded-2xl border p-8 {{ 'border-[var(--gold)] bg-[var(--maroon-deep)] text-[var(--cream)] shadow-elegant lg:-translate-y-4' if f else 'border-[var(--border)] bg-card shadow-card' }}">
+    {% if f %}<span class="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-gold-gradient px-4 py-1 text-xs font-bold uppercase tracking-wider text-[var(--maroon-deep)]">{{ icon('sparkles', 'h-3.5 w-3.5') }}Best Value</span>{% endif %}
+    <h3 class="font-serif text-2xl {{ 'text-[var(--gold-light)]' if f else 'text-[var(--maroon-deep)]' }}">{{ p.name }}</h3>
+    <p class="mt-1 text-sm {{ 'text-[var(--cream)]/70' if f else 'text-muted-foreground' }}">{{ p.blurb }}</p>
+    <div class="mt-6 flex items-baseline gap-1"><span class="font-serif text-5xl {{ 'text-[var(--gold-light)]' if f else 'text-[var(--maroon-deep)]' }}">{{ p.price }}</span><span class="text-sm {{ 'text-[var(--cream)]/60' if f else 'text-muted-foreground' }}">{{ p.unit }}</span></div>
+    <ul class="mt-6 flex-1 space-y-3">{% for item in p.features %}<li class="flex items-start gap-3">{{ icon('check', 'mt-0.5 h-5 w-5 shrink-0 ' ~ ('text-[var(--gold)]' if f else 'text-[var(--maroon)]')) }}<span class="text-sm {{ 'text-[var(--cream)]/90' if f else 'text-foreground' }}">{{ item }}</span></li>{% endfor %}</ul>
+    <a href="#enroll" class="mt-8 block rounded-full py-3 text-center text-sm font-semibold uppercase tracking-wider transition-all {{ 'bg-gold-gradient text-[var(--maroon-deep)] hover:scale-105' if f else 'border-2 border-[var(--maroon)] text-[var(--maroon)] hover:bg-[var(--maroon)] hover:text-white' }}">{{ p.cta }}</a>
+  </div>
+  {% endfor %}</div></div></section>
+
+<section id="faq" class="bg-background py-24"><div class="container max-w-3xl">
+  <div class="mb-12 text-center"><p class="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--maroon-light)]">Questions Answered</p><h2 class="mt-3 font-serif text-4xl text-[var(--maroon-deep)] md:text-5xl">Everything you need to know</h2></div>
+  <div id="faqs">{% for q, a in faqs %}
+    <div class="border-b border-[var(--border)]"><button type="button" class="flex w-full items-center justify-between py-5 text-left font-serif text-lg text-[var(--maroon-deep)]">{{ q }}{{ icon('down', 'h-4 w-4 shrink-0 transition-transform duration-200') }}</button><div class="faq-a">{{ a }}</div></div>
+  {% endfor %}</div></div></section>
+
+<section class="bg-maroon-gradient py-24"><div class="container"><div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+  <div><div class="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full border border-[var(--gold)]/30">{{ icon('music', 'h-7 w-7 text-[var(--gold)]') }}</div>
+    <h2 class="font-serif text-4xl text-[var(--cream)] md:text-5xl">Your first lesson is free.<span class="block text-gradient-gold">Your musical journey starts today.</span></h2>
+    <p class="mt-6 max-w-md text-lg leading-relaxed text-amber-50">Join thousands of Australians who chose National Music Academy to learn piano the right way. Enrol in 60 seconds — no card required.</p>
+    <ul class="mt-8 space-y-3">{% for t in ['First lesson completely free, no obligation', 'Personalised instructor matching within 24 hours', 'Beginners to advanced — all ages welcome'] %}
+      <li class="flex items-center gap-3 text-[var(--cream)]/90"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--gold)] text-xs font-bold text-[var(--maroon-deep)]">✓</span>{{ t }}</li>{% endfor %}</ul></div>
+  <div class="mx-auto w-full max-w-md"><div class="rounded-2xl border border-[var(--gold)]/20 bg-[var(--cream)] p-6 shadow-elegant sm:p-8">{{ enroll_form('section') }}</div></div>
+</div></div></section>
+</main>
+
+<footer class="bg-[var(--maroon-deep)] py-16 text-[var(--cream)]"><div class="container">
+  <div class="grid grid-cols-1 gap-12 md:grid-cols-4">
+    <div class="md:col-span-2"><h3 class="font-serif text-2xl text-[var(--gold-light)]">National Music Academy</h3><p class="mt-4 max-w-sm text-sm leading-relaxed text-[var(--cream)]/70">Australia’s premier online piano academy. Teaching with patience, rigour, and joy since 1999. Proudly based in Melbourne, teaching students nationwide.</p>
+      <div class="mt-6 flex items-center gap-2 text-[var(--gold)]"><span class="text-3xl">♪</span><span class="font-serif text-lg italic text-[var(--cream)]/60">Play with purpose.</span></div></div>
+    <div><h4 class="font-serif text-lg text-[var(--gold-light)]">Explore</h4><ul class="mt-4 space-y-3 text-sm text-[var(--cream)]/70">
+      <li><span class="soon inline-block">Curriculum</span></li><li><span class="soon inline-block">Instructors</span></li>
+      <li><a href="#pricing" class="hover:text-[var(--gold-light)]">Pricing</a></li><li><a href="#faq" class="hover:text-[var(--gold-light)]">FAQ</a></li></ul></div>
+    <div><h4 class="font-serif text-lg text-[var(--gold-light)]">Contact</h4><ul class="mt-4 space-y-3 text-sm text-[var(--cream)]/70">
+      <li class="flex items-center gap-2">{{ icon('phone', 'h-4 w-4 text-[var(--gold)]') }}1300 000 000</li>
+      <li class="flex items-center gap-2">{{ icon('mail', 'h-4 w-4 text-[var(--gold)]') }}hello@nationalmusicacademy.com.au</li>
+      <li class="flex items-center gap-2">{{ icon('pin', 'h-4 w-4 text-[var(--gold)]') }}Melbourne, Australia</li></ul></div>
+  </div>
+  <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[var(--gold)]/15 pt-8 text-xs text-[var(--cream)]/50 sm:flex-row"><p>© 2026 National Music Academy. All rights reserved.</p><div class="flex gap-6"><a href="#" class="hover:text-[var(--gold-light)]">Privacy Policy</a><a href="#" class="hover:text-[var(--gold-light)]">Terms of Service</a></div></div>
+</div></footer>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('menu-btn').onclick=()=>document.getElementById('mobile-menu').classList.toggle('hidden');
+document.getElementById('faqs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)b.parentElement.classList.toggle('open')});
+</script>
+{% endblock %}

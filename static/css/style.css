@@ -1,0 +1,19 @@
+:root{--maroon:#6b1426;--maroon-deep:#4a0e1a;--maroon-light:#9a3a50;--gold:#c9a24b;--gold-light:#e8cc85;--cream:#faf4e8;--background:#fdfaf4;--card:#fff;--foreground:#2a1a1a;--muted:#6f625c;--border:#e8dfce;color-scheme:light}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{font-family:Inter,system-ui,sans-serif;background:var(--background);color:var(--foreground)}
+.font-serif{font-weight:700}h1.font-serif{font-weight:800}
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 1.5rem}
+.bg-maroon-gradient{background:linear-gradient(135deg,var(--maroon-deep),var(--maroon))}
+.bg-gold-gradient{background:linear-gradient(135deg,var(--gold),var(--gold-light))}
+.text-gradient-gold{background:linear-gradient(90deg,var(--gold),var(--gold-light));-webkit-background-clip:text;background-clip:text;color:transparent}
+.shadow-elegant{box-shadow:0 20px 50px -15px rgba(74,14,26,.45)}.shadow-card{box-shadow:0 4px 18px -6px rgba(74,14,26,.12)}
+.glow{color:var(--cream);transition:.2s}.glow:hover{color:var(--gold-light);text-shadow:0 0 12px rgba(232,204,133,.6)}
+.float-glow{color:rgba(250,244,232,.7);transition:.2s}.float-glow:hover{color:var(--gold-light)}
+.soon{position:relative;color:#9b9b9b;cursor:not-allowed}
+.soon::after{content:"Coming soon";position:absolute;left:50%;top:calc(100% + 10px);transform:translateX(-50%);background:#222;color:#fff;font-size:11px;letter-spacing:.05em;text-transform:none;padding:4px 10px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;z-index:60}
+.soon:hover::after{opacity:1}
+.inp{display:flex;height:2.5rem;width:100%;border-radius:.375rem;border:1px solid var(--border);background:#fff;padding:.5rem .75rem;font-size:.875rem}
+.inp:focus{outline:2px solid var(--gold);outline-offset:1px}
+.faq-a{display:none;padding-bottom:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6}.open .faq-a{display:block}.open svg{transform:rotate(180deg)}
+.keys{background:repeating-linear-gradient(90deg,#faf4e8 0 28px,#222 28px 30px)}
+.pattern{background-image:repeating-linear-gradient(90deg,transparent 0 20px,#f0d78c 20px 22px,transparent 22px 28px)}
