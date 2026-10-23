@@ -24,5 +24,13 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--background);color:v
 .soon-block:hover::after{opacity:1}
 
 .pill{border-radius:9999px;padding:.5rem 1rem;font-size:.875rem;font-weight:500;background:var(--secondary);color:var(--maroon-deep);transition:.2s}
-.pill:hover{background:var(--accent)}.pill[aria-pressed=true]{background:var(--maroon);color:#fff}
+.pill:hover{background:var(--accent)}.pill.soon{display:inline-block}.pill.soon:hover{background:var(--secondary)}.pill[aria-pressed=true]{background:var(--maroon);color:#fff}
 [data-unread="1"]{background:#faf4e8}[data-unread="0"] .n-dot{visibility:hidden}
+
+[data-midi].pressed{background-image:none!important;background-color:var(--gold-light)!important}
+[data-midi].ok{background-image:none!important;background-color:#9bd8a5!important}
+[data-midi].bad{background-image:none!important;background-color:#f0a0a0!important}
+.hide-lbl .lbl{display:none}
+.finger rect{fill:#fff;stroke:var(--maroon-light);stroke-width:1.5;cursor:pointer;transition:fill .15s}
+.finger text{fill:var(--maroon-deep);font-size:13px;font-weight:600;pointer-events:none}
+.finger.on rect{fill:var(--gold)}

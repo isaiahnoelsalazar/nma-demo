@@ -1,6 +1,9 @@
 import os
+import re
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort
+from markupsafe import Markup, escape
+from lesson_content import LESSON_CONTENT
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
@@ -46,29 +49,27 @@ def enroll():
 
 STUDENT = dict(name="Eleanor Whitfield", first="Eleanor", initials="EW", level="Conservatoire Level", enrolled="March 2026")
 ACTIVE_LESSONS = {1, 5, 10}  # all other lessons are greyed out as "Coming soon"
-_L = [
-    (1, 1, 1, "Hand Posture & The Five-Finger Position", "Establish proper hand curvature, wrist alignment, and the foundational five-finger hand position that underpins all piano technique.", 18, "Dr. Margaret Holloway", "done"),
-    (2, 1, 2, "Reading the Treble Clef", "Learn to identify notes on the treble staff, understand ledger lines, and sight-read simple melodies with confidence.", 22, "Dr. Margaret Holloway", "done"),
-    (3, 1, 3, "Reading the Bass Clef", "Master the bass clef staff, recognise intervals, and coordinate both hands reading simultaneously.", 20, "Dr. Margaret Holloway", "done"),
-    (4, 2, 1, "C Major Scale — One Octave", "Learn the C major scale with correct fingering, thumb-under technique, and even tone production across one octave.", 25, "James Chen", "done"),
-    (5, 2, 2, "G Major Scale & The Fingering Principle", "Apply the fingering principle to G major, understand the F# requirement, and build muscle memory for sharp-key scales.", 27, "James Chen", "current"),
-    (6, 2, 3, "Two-Octave Scales & Tempo", "Extend scales to two octaves, introduce metronome practice at 60–80 BPM, and develop hand coordination.", 30, "James Chen", "todo"),
-    (7, 2, 4, "Broken Chords & Arpeggio Form", "Transition from solid chords to broken chord patterns and introductory arpeggio exercises.", 24, "James Chen", "todo"),
-    (8, 3, 1, "Clair de Lune — Section A", "Begin Debussy’s masterpiece. Focus on the opening theme, rubato phrasing, and the delicate touch required for Impressionist repertoire.", 35, "Sophia Laurent", "todo"),
-    (9, 3, 2, "Clair de Lune — Section B & Voicing", "Tackle the middle section with its rolling arpeggios, melodic voicing, and dynamic control across overlapping harmonies.", 38, "Sophia Laurent", "todo"),
-    (10, 3, 3, "Pedalling Technique for Debussy", "Master half-pedalling, flutter pedalling, and the sustain techniques that give Debussy’s works their characteristic resonance.", 29, "Sophia Laurent", "todo"),
-    (11, 4, 1, "Sight-Reading Strategies", "Develop systematic sight-reading: pre-scan, key identification, rhythmic counting, and the play-through mindset.", 26, "Dr. Margaret Holloway", "todo"),
-    (12, 4, 2, "Aural Training & Interval Recognition", "Train your ear to identify intervals, chord qualities, and cadences — essential skills for AMEB and ABRSM examinations.", 23, "Dr. Margaret Holloway", "todo"),
+_L = [  # (number, topic, title, description, minutes, instructor, status)
+    (1, "Introduction to the Piano", "Getting Started with Keys, Fingers & Rhythm", "Learn finger numbers, navigate the black and white notes, name the musical alphabet, and play your first rhythms with crotchets and minims.", 18, "Dr. Margaret Holloway", "done"),
+    (2, "Foundations of Technique", "Reading the Treble Clef", "Learn to identify notes on the treble staff, understand ledger lines, and sight-read simple melodies with confidence.", 22, "Dr. Margaret Holloway", "done"),
+    (3, "Foundations of Technique", "Reading the Bass Clef", "Master the bass clef staff, recognise intervals, and coordinate both hands reading simultaneously.", 20, "Dr. Margaret Holloway", "done"),
+    (4, "Scales & Arpeggios", "C Major Scale — One Octave", "Learn the C major scale with correct fingering, thumb-under technique, and even tone production across one octave.", 25, "James Chen", "done"),
+    (5, "Scales & Arpeggios", "G Major Scale & The Fingering Principle", "Apply the fingering principle to G major, understand the F# requirement, and build muscle memory for sharp-key scales.", 27, "James Chen", "current"),
+    (6, "Scales & Arpeggios", "Two-Octave Scales & Tempo", "Extend scales to two octaves, introduce metronome practice at 60–80 BPM, and develop hand coordination.", 30, "James Chen", "todo"),
+    (7, "Scales & Arpeggios", "Broken Chords & Arpeggio Form", "Transition from solid chords to broken chord patterns and introductory arpeggio exercises.", 24, "James Chen", "todo"),
+    (8, "Repertoire: Debussy", "Clair de Lune — Section A", "Begin Debussy’s masterpiece. Focus on the opening theme, rubato phrasing, and the delicate touch required for Impressionist repertoire.", 35, "Sophia Laurent", "todo"),
+    (9, "Repertoire: Debussy", "Clair de Lune — Section B & Voicing", "Tackle the middle section with its rolling arpeggios, melodic voicing, and dynamic control across overlapping harmonies.", 38, "Sophia Laurent", "todo"),
+    (10, "Repertoire: Debussy", "Pedalling Technique for Debussy", "Master half-pedalling, flutter pedalling, and the sustain techniques that give Debussy’s works their characteristic resonance.", 29, "Sophia Laurent", "todo"),
 ]
-LESSONS = [dict(zip(("num", "module", "mlesson", "title", "desc", "minutes", "instructor", "status"), l)) for l in _L]
-MODULE_TITLES = {1: "Foundations of Technique", 2: "Scales & Arpeggios", 3: "Repertoire: Debussy", 4: "Musicianship"}
-MODULES = []
-for n, t in MODULE_TITLES.items():
-    ls = [l for l in LESSONS if l["module"] == n]
-    d = sum(l["status"] == "done" for l in ls)
-    MODULES.append(dict(n=n, title=t, total=len(ls), done=d, pct=round(100 * d / len(ls))))
+LESSONS = [dict(zip(("num", "topic", "title", "desc", "minutes", "instructor", "status"), l)) for l in _L]
+MODULES = []  # dashboard "Your Curriculum": lessons grouped by topic
 for l in LESSONS:
-    l["module_title"] = MODULE_TITLES[l["module"]]
+    if not MODULES or MODULES[-1]["title"] != l["topic"]:
+        MODULES.append(dict(n=len(MODULES) + 1, title=l["topic"], total=0, done=0))
+    MODULES[-1]["total"] += 1
+    MODULES[-1]["done"] += l["status"] == "done"
+for m in MODULES:
+    m["pct"] = round(100 * m["done"] / m["total"])
 WEEK = [("Mon", 30), ("Tue", 25), ("Wed", 45), ("Thu", 0), ("Fri", 30), ("Sat", 15), ("Sun", 0)]
 SKILLS = [("Technique", 82), ("Sight-Reading", 64), ("Repertoire", 38), ("Aural Skills", 55), ("Theory", 71)]
 NOTIFICATIONS = [
@@ -77,6 +78,14 @@ NOTIFICATIONS = [
     dict(id="n3", title="35 minutes to your weekly goal", text="You’re at 145 of 180 practice minutes this week.", time="Yesterday"),
     dict(id="n4", title="Welcome to the NMA Portal", text="Explore your lessons and track your progress here.", time="3 days ago"),
 ]
+
+
+@app.template_filter("md")
+def md(text):
+    t = str(escape(text))
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    t = re.sub(r"`(.+?)`", r'<code class="rounded bg-[var(--secondary)] px-1.5 py-0.5 text-[13px]">\1</code>', t)
+    return Markup(t)
 
 
 @app.context_processor
@@ -124,8 +133,18 @@ def portal_dashboard():
 @login_required
 def portal_lessons():
     done = sum(l["status"] == "done" for l in LESSONS)
-    return render_template("lessons.html", student=STUDENT, lessons=LESSONS, modules=MODULES,
-                           active=ACTIVE_LESSONS, done=done)
+    return render_template("lessons.html", student=STUDENT, lessons=LESSONS, active=ACTIVE_LESSONS, done=done)
+
+
+@app.route("/portal/lessons/<int:num>")
+@login_required
+def portal_lesson(num):
+    lesson = next((l for l in LESSONS if l["num"] == num), None)
+    if lesson is None:
+        abort(404)
+    if num not in ACTIVE_LESSONS:
+        return redirect(url_for("portal_lessons"))
+    return render_template("lesson.html", student=STUDENT, lesson=lesson, content=LESSON_CONTENT.get(num, {}))
 
 
 @app.route("/portal/progress")
