@@ -8,7 +8,7 @@
 <script>
 tailwind.config={theme:{extend:{colors:{background:'var(--background)',card:'var(--card)',foreground:'var(--foreground)','muted-foreground':'var(--muted)','primary-foreground':'#fff',ring:'var(--gold)'},fontFamily:{serif:['"Playfair Display"','Georgia','serif']}}}}
 </script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital@0;1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap">
 <style>
 :root{--maroon:#6b1426;--maroon-deep:#4a0e1a;--maroon-light:#9a3a50;--gold:#c9a24b;--gold-light:#e8cc85;--cream:#faf4e8;--background:#fdfaf4;--card:#fff;--foreground:#2a1a1a;--muted:#6f625c;--border:#e8dfce;color-scheme:light}
 html{scroll-behavior:smooth;scroll-padding-top:5rem}
@@ -26,6 +26,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--background);color:v
 .inp:focus{outline:2px solid var(--gold);outline-offset:1px}
 .faq-a{display:none;padding-bottom:1.25rem;font-size:.875rem;color:var(--muted);line-height:1.6}.open .faq-a{display:block}.open svg{transform:rotate(180deg)}
 .keys{background:repeating-linear-gradient(90deg,#faf4e8 0 28px,#222 28px 30px)}
+.font-serif{font-weight:700}h1.font-serif{font-weight:800}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute"><defs>
@@ -51,7 +52,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--background);color:v
 <g id="down"><path d="m6 9 6 6 6-6"/></g>
 </defs></svg>
 
-<header class="fixed inset-x-0 top-0 z-50 border-b border-[var(--gold)]/15 bg-[var(--maroon-deep)]/95 backdrop-blur-md" style="padding-top:env(safe-area-inset-top,0)">
+<header class="fixed inset-x-0 top-0 z-50 border-b-2 border-[var(--gold)]/40 bg-maroon-gradient shadow-elegant" style="padding-top:env(safe-area-inset-top,0)">
 <div class="container flex h-20 items-center justify-between">
 <a href="#" class="font-serif text-2xl text-[var(--gold-light)]">National Music Academy</a>
 <nav class="hidden items-center gap-8 md:flex text-sm font-medium uppercase tracking-wider">
