@@ -18,8 +18,8 @@ SYNC = "Synchronized virtual keyboard with light-up keys during video playback."
 BEAT = "Synchronized rhythmic audio playback with visual beat indicators."
 
 
-def media(video_desc, player_desc=SYNC):
-    return {"video": {"url": "", "desc": video_desc}, "player": {"src": "", "desc": player_desc}}
+def media(video_desc, video_url="", player_desc=SYNC, player_src=""):
+    return {"video": {"url": video_url, "desc": video_desc}, "player": {"src": player_src, "desc": player_desc}}
 
 
 def sec(heading, text=(), **extra):
@@ -45,29 +45,13 @@ LESSON_CONTENT = {
                 sec("Kangaroo Hop Drill", [
                     "**Objective:** Play the group of 2 black notes using **fingers 2 and 3**, starting from the low end of the keyboard and ascending higher.",
                     "Practice separately with Right Hand and Left Hand."]),
-                sec("Right Hand - Kangaroo Hop",
-                    **{
-                        **media("Demonstrates Right Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard."),
-                        "video": {"url": "/static/media/lesson1/right-kangaroo-hop.mp4", "desc": "Demonstrates Right Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard."}
-                    }),
-                sec("Left Hand - Kangaroo Hop",
-                    **{
-                        **media("Demonstrates Left Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard."),
-                        "video": {"url": "/static/media/lesson1/left-kangaroo-hop.mp4", "desc": "Demonstrates Left Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard."}
-                    }),
+                sec("Right Hand - Kangaroo Hop", **media("Demonstrates Right Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard.", "/static/media/lesson1/right-kangaroo-hop.mp4")),
+                sec("Left Hand - Kangaroo Hop", **media("Demonstrates Left Hand playing fingers 2 and 3 on groups of 2 black notes up the keyboard.", "/static/media/lesson1/left-kangaroo-hop.mp4")),
                 sec("Three-Legged Kangaroo Drill", [
                     "**Objective:** Play the group of 3 black notes using **fingers 2, 3, and 4**, starting low and ascending higher.",
                     "Practice separately with Right Hand and Left Hand."]),
-                sec("Right Hand - Three-Legged Kangaroo",
-                    **{
-                        **media("Demonstrates Right Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."),
-                        "video": {"url": "/static/media/lesson1/right-three-legged-kangaroo.mp4", "desc": "Demonstrates Right Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."}
-                    }),
-                sec("Left Hand - Three-Legged Kangaroo",
-                    **{
-                        **media("Demonstrates Left Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."),
-                        "video": {"url": "/static/media/lesson1/left-three-legged-kangaroo.mp4", "desc": "Demonstrates Left Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."}
-                    }),
+                sec("Right Hand - Three-Legged Kangaroo", **media("Demonstrates Right Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard.", "/static/media/lesson1/right-three-legged-kangaroo.mp4")),
+                sec("Left Hand - Three-Legged Kangaroo", **media("Demonstrates Left Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard.", "/static/media/lesson1/left-three-legged-kangaroo.mp4"))
             ]},
             {"title": "Part 3: The Musical Alphabet & Finding Notes", "sections": [
                 sec("The Musical Alphabet", [
