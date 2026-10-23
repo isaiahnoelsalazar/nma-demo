@@ -58,8 +58,16 @@ LESSON_CONTENT = {
                 sec("Three-Legged Kangaroo Drill", [
                     "**Objective:** Play the group of 3 black notes using **fingers 2, 3, and 4**, starting low and ascending higher.",
                     "Practice separately with Right Hand and Left Hand."]),
-                sec("Right Hand - Three-Legged Kangaroo", **media("Demonstrates Right Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard.")),
-                sec("Left Hand - Three-Legged Kangaroo", **media("Demonstrates Left Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard.")),
+                sec("Right Hand - Three-Legged Kangaroo",
+                    **{
+                        **media("Demonstrates Right Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."),
+                        "video": {"url": "/static/media/lesson1/right-three-legged-kangaroo.mp4", "desc": "Demonstrates Right Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."}
+                    }),
+                sec("Left Hand - Three-Legged Kangaroo",
+                    **{
+                        **media("Demonstrates Left Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."),
+                        "video": {"url": "/static/media/lesson1/left-three-legged-kangaroo.mp4", "desc": "Demonstrates Left Hand playing fingers 2, 3, and 4 on groups of 3 black notes up the keyboard."}
+                    }),
             ]},
             {"title": "Part 3: The Musical Alphabet & Finding Notes", "sections": [
                 sec("The Musical Alphabet", [
