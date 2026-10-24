@@ -1,3 +1,4 @@
+import copy
 import os
 import re
 from functools import wraps
@@ -80,6 +81,35 @@ NOTIFICATIONS = [
 ]
 
 
+def slug(text):
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def media_url(num, name, exts):
+    """URL of static/media/lesson<N>/<name><ext> if that file exists, else ''."""
+    for ext in exts:
+        if os.path.exists(os.path.join(app.static_folder, "media", f"lesson{num}", name + ext)):
+            return url_for("static", filename=f"media/lesson{num}/{name}{ext}")
+    return ""
+
+
+def with_media(num, content):
+    """Fill empty media slots from files dropped into static/media/lesson<N>/ (links in lesson_content.py win)."""
+    c = copy.deepcopy(content)
+    if not c.get("sheet_music"):
+        c["sheet_music"] = media_url(num, "sheet-music", (".pdf",))
+    for part in c.get("parts", []):
+        for sct in part["sections"]:
+            name = slug(sct["heading"])
+            if sct.get("video") is not None and not sct["video"].get("url"):
+                sct["video"]["url"] = media_url(num, name, (".mp4", ".webm", ".mov"))
+            if sct.get("audio") is not None and not sct["audio"].get("url"):
+                sct["audio"]["url"] = media_url(num, name, (".mp3", ".wav", ".m4a", ".ogg"))
+            if sct.get("download") is not None and not sct["download"].get("url"):
+                sct["download"]["url"] = media_url(num, slug(sct["download"]["label"]), (".pdf", ".zip"))
+    return c
+
+
 @app.template_filter("md")
 def md(text):
     t = str(escape(text))
@@ -144,7 +174,7 @@ def portal_lesson(num):
         abort(404)
     if num not in ACTIVE_LESSONS:
         return redirect(url_for("portal_lessons"))
-    return render_template("lesson.html", student=STUDENT, lesson=lesson, content=LESSON_CONTENT.get(num, {}))
+    return render_template("lesson.html", student=STUDENT, lesson=lesson, content=with_media(num, LESSON_CONTENT.get(num, {})))
 
 
 @app.route("/portal/progress")

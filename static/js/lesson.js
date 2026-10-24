@@ -96,4 +96,97 @@
     });
     pick();
   });
+  // ---- Staff note-reading game (bass: Middle C/B, treble: all line, space and middle notes) ----
+  const STAFF = {
+    bass: { glyph: '𝄢', label: 'Bass Clef', buttons: ['Middle C', 'Middle B'],
+      notes: [{ ans: 'Middle B', step: 9, midi: 59 }, { ans: 'Middle C', step: 10, midi: 60 }] },
+    treble: { glyph: '𝄞', label: 'Treble Clef', buttons: ['A','B','C','D','E','F','G','Middle C','Middle D'],
+      notes: [{ ans: 'E', step: 0, midi: 64 }, { ans: 'F', step: 1, midi: 65 }, { ans: 'G', step: 2, midi: 67 }, { ans: 'A', step: 3, midi: 69 },
+              { ans: 'B', step: 4, midi: 71 }, { ans: 'C', step: 5, midi: 72 }, { ans: 'D', step: 6, midi: 74 }, { ans: 'E', step: 7, midi: 76 },
+              { ans: 'F', step: 8, midi: 77 }, { ans: 'Middle C', step: -2, midi: 60 }, { ans: 'Middle D', step: -1, midi: 62 }] }
+  };
+  document.querySelectorAll('[data-widget=staffgame]').forEach(el => {
+    const cfg = STAFF[el.dataset.clef]; if (!cfg) return;
+    const treble = el.dataset.clef === 'treble';
+    el.innerHTML = `<div class="mb-2 flex items-center justify-between text-sm"><span class="font-medium text-[var(--maroon-deep)]">What is this note?</span><span class="text-muted-foreground">Score: <span class="sg-s">0</span></span></div><div class="sg-svg mx-auto max-w-xs rounded-xl bg-[var(--cream)] p-2"></div><div class="mt-3 flex flex-wrap justify-center gap-2">${cfg.buttons.map(b => `<button type="button" class="pill" data-a="${b}">${b}</button>`).join('')}</div><p class="sg-f mt-2 h-5 text-center text-sm text-muted-foreground"></p>`;
+    const box = el.querySelector('.sg-svg'), sEl = el.querySelector('.sg-s'), fEl = el.querySelector('.sg-f');
+    let note, score = 0;
+    const draw = n => {
+      const y = 108 - n.step * 6, up = n.step < 4, sx = up ? 127.5 : 112.5;
+      let s = `<svg viewBox="0 0 220 170" class="w-full" role="img" aria-label="${cfg.label} stave with one note">`;
+      for (let i = 0; i < 5; i++) s += `<line x1="10" x2="210" y1="${60 + i * 12}" y2="${60 + i * 12}" stroke="var(--maroon-deep)" stroke-width="1.2"/>`;
+      s += `<text x="16" y="${treble ? 112 : 92}" font-size="${treble ? 64 : 54}" fill="var(--maroon-deep)">${cfg.glyph}</text>`;
+      if (n.step <= -2 || n.step >= 10) s += `<line x1="104" x2="136" y1="${y}" y2="${y}" stroke="var(--maroon-deep)" stroke-width="1.2"/>`;
+      s += `<ellipse cx="120" cy="${y}" rx="8" ry="5.5" transform="rotate(-20 120 ${y})" fill="var(--maroon)"/><line x1="${sx}" x2="${sx}" y1="${y}" y2="${up ? y - 36 : y + 36}" stroke="var(--maroon)" stroke-width="1.8"/>`;
+      return s + `<text x="110" y="162" text-anchor="middle" font-size="11" fill="var(--muted)">${cfg.label}</text></svg>`;
+    };
+    const next = () => { let n; do { n = cfg.notes[Math.floor(Math.random() * cfg.notes.length)]; } while (n === note && cfg.notes.length > 1); note = n; box.innerHTML = draw(n); };
+    el.addEventListener('click', e => {
+      const b = e.target.closest('[data-a]'); if (!b) return;
+      tone(note.midi);
+      if (b.dataset.a === note.ans) { sEl.textContent = ++score; fEl.textContent = 'Correct!'; next(); }
+      else fEl.textContent = 'Not quite — try again.';
+    });
+    next();
+  });
+  // ---- Lesson 1 interactive players ----
+  // keys: clickable keyboard with finger-number guides; lights keys in sync with the section video if cues are set
+  document.querySelectorAll('[data-player][data-kind=keys]').forEach(el => {
+    const keys = build(el, 48, 84, m => { tone(m); flash(keys[m], 'pressed', 200); });
+    const g = el.dataset.guide, R = el.dataset.hand !== 'L';
+    const PC = { black2: [1, 3], black3: [6, 8, 10], allC: [0] };
+    const FING = { black2: R ? [2, 3] : [3, 2], black3: R ? [2, 3, 4] : [4, 3, 2], allC: [1] };
+    Object.keys(keys).forEach(m => {
+      const i = (PC[g] || []).indexOf(m % 12); if (i < 0) return;
+      keys[m].classList.add('guide'); keys[m].insertAdjacentHTML('beforeend', `<span class="fing">${FING[g][i]}</span>`);
+    });
+    let cues = []; try { cues = JSON.parse(el.dataset.cues || '[]'); } catch (e) {}
+    const vid = el.closest('.sec-card') && el.closest('.sec-card').querySelector('video');
+    if (vid && cues.length) {
+      const lit = new Set();
+      const loop = () => {
+        const t = vid.currentTime, now = new Set();
+        cues.forEach(([s0, d, ms]) => { if (t >= s0 && t < s0 + d) ms.forEach(m => now.add(m)); });
+        Object.keys(keys).forEach(m => keys[m].classList.toggle('pressed', now.has(+m)));
+        if (!vid.paused && !vid.ended) requestAnimationFrame(loop);
+      };
+      ['play', 'seeked', 'pause', 'ended'].forEach(ev => vid.addEventListener(ev, () => requestAnimationFrame(loop)));
+    }
+  });
+
+  // beat: rhythm trainer (S = stomp crotchet, K = clap crotchet, M = clap minim)
+  const hit = type => {
+    if (muted) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = ctx.currentTime, g = ctx.createGain(); g.connect(ctx.destination);
+      if (type === 'S') {
+        const o = ctx.createOscillator(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + .15);
+        g.gain.setValueAtTime(.6, t); g.gain.exponentialRampToValueAtTime(.001, t + .22); o.connect(g); o.start(t); o.stop(t + .25);
+      } else {
+        const buf = ctx.createBuffer(1, ctx.sampleRate * .15, ctx.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+        const n = ctx.createBufferSource(), f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800;
+        n.buffer = buf; g.gain.value = .7; n.connect(f).connect(g); n.start(t);
+      }
+    } catch (e) {}
+  };
+  document.querySelectorAll('[data-player][data-kind=beat]').forEach(el => {
+    const pat = [...(el.dataset.pattern || '')], bpm = +el.dataset.bpm || 70, beat = 60000 / bpm, LEN = { S: 1, K: 1, M: 2 };
+    el.classList.remove('overflow-x-auto');
+    el.innerHTML = `<div class="flex items-center gap-3"><button type="button" class="bp-go flex items-center gap-1.5 rounded-md bg-gold-gradient px-3 py-1.5 text-xs font-semibold text-[var(--maroon-deep)]">Play rhythm</button><span class="bp-c font-serif text-2xl text-[var(--gold-light)]">&nbsp;</span></div><div class="mt-3 flex gap-1">${pat.map((p, i) => `<div data-i="${i}" class="bp-b h-8 rounded border border-[var(--gold)]/30 bg-white/10 text-center text-[11px] leading-8 text-[var(--cream)]/70" style="flex:${LEN[p]}">${p === 'M' ? '1-2' : '1'}</div>`).join('')}</div><p class="mt-2 text-[11px] text-[var(--cream)]/50">♩ = ${bpm} BPM${el.dataset.pattern.includes('S') ? ' · stomp on crotchets, clap on minims' : ' · clap along'}</p>`;
+    const go = el.querySelector('.bp-go'), cnt = el.querySelector('.bp-c'), blocks = el.querySelectorAll('.bp-b');
+    let timers = [];
+    const stop = () => { timers.forEach(clearTimeout); timers = []; blocks.forEach(b => b.classList.remove('on')); cnt.innerHTML = '&nbsp;'; go.textContent = 'Play rhythm'; };
+    go.onclick = () => {
+      if (timers.length) return stop();
+      go.textContent = 'Stop'; let t = 0;
+      pat.forEach((p, i) => {
+        timers.push(setTimeout(() => { blocks.forEach(b => b.classList.remove('on')); blocks[i].classList.add('on'); cnt.textContent = '1'; hit(p); }, t * beat));
+        if (p === 'M') timers.push(setTimeout(() => { cnt.textContent = '2'; }, (t + 1) * beat));
+        t += LEN[p];
+      });
+      timers.push(setTimeout(stop, t * beat));
+    };
+  });
 })();

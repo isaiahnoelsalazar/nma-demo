@@ -34,3 +34,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--background);color:v
 .finger rect{fill:#fff;stroke:var(--maroon-light);stroke-width:1.5;cursor:pointer;transition:fill .15s}
 .finger text{fill:var(--maroon-deep);font-size:13px;font-weight:600;pointer-events:none}
 .finger.on rect{fill:var(--gold)}
+
+[data-midi].guide{outline:2px solid var(--gold);outline-offset:-2px}
+.fing{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:16px;height:16px;border-radius:9999px;background:var(--gold);color:var(--maroon-deep);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:20}
+.bp-b{transition:background .1s}.bp-b.on{background:var(--gold)!important;color:var(--maroon-deep)!important}

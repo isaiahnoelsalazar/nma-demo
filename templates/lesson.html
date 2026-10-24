@@ -12,24 +12,7 @@
   <a href="{{ url_for('portal_lessons') }}" class="flex items-center gap-2 text-sm font-medium text-[var(--maroon-light)] hover:underline">{{ icon('chevleft', 'h-4 w-4') }}Back to Lessons</a>
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <div class="lg:col-span-2">
-      <div class="overflow-hidden rounded-2xl shadow-elegant">
-        {% if content.main_video %}
-          {{ embed(content.main_video, lesson.title) }}
-        {% else %}
-          <div class="relative flex aspect-video items-center justify-center bg-maroon-gradient">
-            <div class="pattern absolute inset-0 opacity-[0.08]"></div>
-            <button type="button" class="relative flex h-20 w-20 items-center justify-center rounded-full bg-gold-gradient transition-transform hover:scale-110" aria-label="Play">{{ icon('play', 'ml-1 h-8 w-8 fill-current text-[var(--maroon-deep)]') }}</button>
-            <span class="float-glow absolute bottom-4 right-4 rounded bg-black/50 px-2 py-1 text-sm">{{ lesson.minutes }} min</span>
-            <span class="absolute bottom-4 left-4 text-[11px] text-[var(--cream)]/60">Video placeholder — set main_video in lesson_content.py</span>
-          </div>
-          <div class="flex items-center gap-4 bg-[var(--maroon-deep)] px-4 py-3">
-            <div class="h-1 flex-1 overflow-hidden rounded-full bg-white/20"><div class="h-full w-0 rounded-full bg-gold-gradient"></div></div>
-            <span class="float-glow text-xs">0:00 / {{ lesson.minutes }} min</span>{{ icon('volume', 'float-glow h-4 w-4') }}{{ icon('maximize', 'float-glow h-4 w-4') }}
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="mt-5">
+      <div>
         <p class="text-xs uppercase tracking-wider text-[var(--maroon-light)]">{{ lesson.topic }} · Lesson {{ lesson.num }}</p>
         <h1 class="mt-1 font-serif text-2xl text-[var(--maroon-deep)]">{{ lesson.title }}</h1>
         <p class="mt-2 text-sm text-muted-foreground">{{ lesson.desc }}</p>
@@ -45,10 +28,11 @@
         <h2 class="font-serif text-xl text-[var(--maroon-deep)]">{{ part.title }}</h2>
         <div class="mt-3 space-y-4">
         {% for s in part.sections %}
-          <div class="rounded-2xl border border-[var(--border)] bg-card p-5 shadow-card">
+          <div class="sec-card rounded-2xl border border-[var(--border)] bg-card p-5 shadow-card">
             <h3 class="font-serif text-lg text-[var(--maroon-deep)]">{{ s.heading }}</h3>
-            {% if s.text %}<ul class="mt-2 list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">{% for t in s.text %}<li>{{ t|md }}</li>{% endfor %}</ul>{% endif %}
-            {% if s.widget %}<div class="mt-4" data-widget="{{ s.widget }}"></div>{% endif %}
+            {% if s.text %}<ul class="mt-2 list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">{% for t in s.text %}<li>{% if t is string %}{{ t|md }}{% else %}{{ t.t|md }}<ul class="mt-1.5 list-[circle] space-y-1 pl-5">{% for u in t.sub %}<li>{{ u|md }}</li>{% endfor %}</ul>{% endif %}</li>{% endfor %}</ul>{% endif %}
+            {% if s.widget %}<div class="mt-4" data-widget="{{ s.widget }}"{% if s.clef %} data-clef="{{ s.clef }}"{% endif %}></div>{% endif %}
+            {% if s.audio %}<div class="mt-4 rounded-xl border border-[var(--gold)]/20 bg-[var(--maroon-deep)] p-4">{% if s.audio.url %}<audio class="w-full" src="{{ s.audio.url }}" controls preload="none"></audio>{% else %}<div class="flex items-start gap-3">{{ icon('music', 'mt-0.5 h-5 w-5 shrink-0 text-[var(--gold)]') }}<div><p class="font-serif text-sm text-[var(--gold-light)]">Backing Track</p><p class="text-xs text-[var(--cream)]/70">{{ s.audio.desc }}</p><p class="mt-1 text-[11px] text-[var(--cream)]/50">Placeholder — add the audio link in lesson_content.py</p></div></div>{% endif %}</div>{% endif %}
             {% if s.video %}
               <div class="mt-4 overflow-hidden rounded-xl bg-maroon-gradient">
                 {% if s.video.url %}{{ embed(s.video.url, s.heading) }}
@@ -58,6 +42,7 @@
             {% endif %}
             {% if s.player %}
               {% if s.player.src %}<iframe class="mt-3 h-64 w-full rounded-xl border-0" src="{{ s.player.src }}" title="Interactive player" loading="lazy"></iframe>
+              {% elif s.player.kind %}<div class="mt-3 rounded-xl border border-[var(--gold)]/20 bg-[var(--maroon-deep)] p-4"><div class="mb-3 flex items-center gap-2">{{ icon('music', 'h-5 w-5 text-[var(--gold)]') }}<p class="font-serif text-sm text-[var(--gold-light)]">Interactive Player</p></div><div data-player data-kind="{{ s.player.kind }}" data-guide="{{ s.player.guide }}" data-hand="{{ s.player.hand }}" data-pattern="{{ s.player.pattern }}" data-bpm="{{ s.player.bpm }}" data-cues='{{ (s.player.cues or [])|tojson }}' class="overflow-x-auto pb-1"></div><p class="mt-3 text-[11px] text-[var(--cream)]/60">{{ s.player.desc }}</p></div>
               {% else %}<div class="mt-3 flex items-start gap-3 rounded-xl border border-[var(--gold)]/20 bg-[var(--maroon-deep)] p-4">{{ icon('music', 'mt-0.5 h-5 w-5 shrink-0 text-[var(--gold)]') }}<div><p class="font-serif text-sm text-[var(--gold-light)]">Interactive Player</p><p class="text-xs text-[var(--cream)]/70">{{ s.player.desc }}</p><p class="mt-1 text-[11px] text-[var(--cream)]/50">Placeholder — add the player link in lesson_content.py</p></div></div>{% endif %}
             {% endif %}
             {% if s.download %}
