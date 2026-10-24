@@ -23,8 +23,8 @@ SYNC = "Synchronized virtual keyboard with light-up keys during video playback."
 BEAT = "Synchronized rhythmic audio playback with visual beat indicators."
 
 
-def media(video_desc, player_desc=SYNC, **player_extra, video_url=""):
-    return {"video": {"url": video_url, "desc": video_desc}, "player": {"src": "", "desc": player_desc, **player_extra}}
+def media(video_desc, player_desc=SYNC, **player_extra):
+    return {"video": {"url": "", "desc": video_desc}, "player": {"src": "", "desc": player_desc, **player_extra}}
 
 
 def sec(heading, text=(), **extra):
