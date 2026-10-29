@@ -316,8 +316,7 @@ def portal_lesson(num):
         return redirect(url_for("portal_lessons"))
     student = get_current_student()
     content = with_media(num, LESSON_CONTENT.get(num, {}))
-    module_videos = get_module_videos(num)
-    return render_template("lesson.html", student=student, lesson=lesson, content=content, module_videos=module_videos)
+    return render_template("lesson.html", student=student, lesson=lesson, content=content)
 
 
 @app.route("/portal/progress")
