@@ -4,10 +4,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
-SUPABASE_KEY = (os.environ.get("SUPABASE_KEY") or os.environ.get("SUPABASE_ANON_KEY") or "").strip()
+# Server-side key. The service-role key is required for the admin/academy/student tables
+# (RLS is enabled with no public policies, so the anon key cannot read password hashes).
+SUPABASE_KEY = (
+    os.environ.get("SUPABASE_SERVICE_KEY")
+    or os.environ.get("SUPABASE_KEY")
+    or os.environ.get("SUPABASE_ANON_KEY")
+    or ""
+).strip()
 SUPABASE_STORAGE_BUCKET = os.environ.get("SUPABASE_STORAGE_BUCKET", "lesson-videos").strip()
 
 _client = None
+
 
 def get_supabase():
     global _client
@@ -22,6 +30,7 @@ def get_supabase():
     except Exception as err:
         print(f"[Supabase Init Warning] Could not connect: {err}")
         return None
+
 
 def get_supabase_video_url(relative_path: str) -> str:
     """Returns the full public Supabase storage URL for a given file path."""

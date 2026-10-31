@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, field %}
+{% set is_acad = academy is not none %}
+{% block title %}{{ academy.name if is_acad else 'Admin' }} — NMA Admin{% endblock %}
+{% block body %}
+<div class="min-h-screen bg-[var(--background)]">
+  <header class="bg-maroon-gradient shadow-elegant"><div class="container flex h-16 items-center justify-between">
+    <span class="font-serif text-xl text-[var(--gold-light)]">NMA Admin{% if is_acad %} — {{ academy.acronym }}{% endif %}</span>
+    <div class="flex items-center gap-6 text-sm font-medium">
+      {% if is_acad and session.get('admin') %}<a class="glow" href="{{ url_for('admin.dashboard') }}">All academies</a>{% endif %}
+      {% if is_acad and not session.get('admin') %}<a class="glow" href="{{ url_for('admin.academy_logout', acr=academy.acronym) }}">Sign out</a>
+      {% else %}<a class="glow" href="{{ url_for('admin.logout') }}">Sign out</a>{% endif %}
+    </div>
+  </div></header>
+
+  <main class="container space-y-6 py-8">
+    <div>
+      <h1 class="font-serif text-3xl text-[var(--maroon-deep)]">{{ academy.name if is_acad else 'Academy accounts' }}</h1>
+      <p class="mt-1 text-sm text-muted-foreground">{% if is_acad %}{{ academy.email }} · Create and manage student accounts.{% else %}Create academy accounts. Each academy manages its own students at /admin/ACRONYM.{% endif %}</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {% if is_acad %}
+        {% set stats = [('Students registered', rows|length)] %}
+      {% else %}
+        {% set stats = [('Academies registered', total_academies), ('Students registered', total_students)] %}
+      {% endif %}
+      {% for label, n in stats %}
+      <div class="rounded-lg border border-[var(--border)] bg-card p-5 shadow-card"><div class="flex items-center justify-between"><p class="text-xs uppercase tracking-wider text-muted-foreground">{{ label }}</p>{{ icon('users', 'h-4 w-4 text-[var(--maroon-light)]') }}</div><p class="mt-2 font-serif text-4xl text-[var(--maroon-deep)]">{{ n }}</p></div>
+      {% endfor %}
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div class="rounded-lg border border-[var(--border)] bg-card p-6 shadow-card lg:self-start">
+        <h2 class="font-serif text-xl text-[var(--maroon-deep)]">{{ 'Add a student' if is_acad else 'Add an academy' }}</h2>
+        <form class="mt-4 space-y-4" method="post" action="{{ url_for('admin.create_student', acr=academy.acronym) if is_acad else url_for('admin.create_academy') }}" autocomplete="off">
+          {% if is_acad %}
+            {{ field('name', 'Student name', 'text', 'name', 'Eleanor Whitfield') }}
+            {{ field('email', 'Student email', 'email', 'email', 'eleanor@example.com') }}
+            {{ field('password', 'Student password', 'password', 'password', 'At least 6 characters') }}
+          {% else %}
+            {{ field('name', 'Academy name', 'text', 'name', 'National Music Academy') }}
+            {{ field('acronym', 'Academy acronym', 'text', 'acronym', 'NMA') }}
+            {{ field('email', 'Academy email', 'email', 'email', 'admin@academy.com') }}
+            {{ field('password', 'Academy password', 'password', 'password', 'At least 6 characters') }}
+          {% endif %}
+          <button type="submit" class="w-full rounded-md bg-[var(--maroon)] py-3 text-sm font-semibold uppercase tracking-wider text-white transition-all hover:bg-[var(--maroon-deep)]">{{ 'Create student account' if is_acad else 'Create academy account' }}</button>
+        </form>
+      </div>
+
+      <div class="overflow-hidden rounded-lg border border-[var(--border)] bg-card shadow-card lg:col-span-2">
+        <div class="border-b border-[var(--border)] px-6 py-4"><h2 class="font-serif text-xl text-[var(--maroon-deep)]">{{ 'Students' if is_acad else 'Academies' }}</h2></div>
+        {% if rows %}
+        <div class="overflow-x-auto"><table class="w-full text-left text-sm">
+          <thead class="bg-[var(--secondary)] text-xs uppercase tracking-wider text-muted-foreground"><tr>
+            {% if is_acad %}<th class="px-6 py-3">Name</th><th class="px-6 py-3">Email</th><th class="px-6 py-3">Created</th>
+            {% else %}<th class="px-6 py-3">Academy</th><th class="px-6 py-3">Email</th><th class="px-6 py-3">Students</th><th class="px-6 py-3">Created</th>{% endif %}
+            <th class="px-6 py-3"></th></tr></thead>
+          <tbody>
+          {% for r in rows %}
+            <tr class="border-t border-[var(--border)]">
+              {% if is_acad %}
+                <td class="px-6 py-3 font-medium text-[var(--maroon-deep)]">{{ r.name }}</td>
+              {% else %}
+                <td class="px-6 py-3"><a class="font-medium text-[var(--maroon-deep)] hover:underline" href="{{ url_for('admin.academy', acr=r.acronym) }}">{{ r.name }}</a> <span class="text-xs text-muted-foreground">{{ r.acronym }}</span></td>
+              {% endif %}
+              <td class="px-6 py-3 text-muted-foreground">{{ r.email }}</td>
+              {% if not is_acad %}<td class="px-6 py-3 text-muted-foreground">{{ r.students }}</td>{% endif %}
+              <td class="px-6 py-3 text-muted-foreground">{{ r.created_at[:10] }}</td>
+              <td class="px-6 py-3 text-right"><form method="post" action="{{ url_for('admin.delete_student', acr=academy.acronym, student_id=r.id) if is_acad else url_for('admin.delete_academy', academy_id=r.id) }}" onsubmit="return confirm('Delete {{ r.name|e }}{{ '' if is_acad else ' and all of its students' }}?')"><button class="text-xs font-medium text-[var(--maroon-light)] hover:underline" type="submit">Delete</button></form></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table></div>
+        {% else %}
+        <p class="px-6 py-10 text-center text-sm text-muted-foreground">{{ 'No students yet. Add the first one using the form.' if is_acad else 'No academies yet. Add the first one using the form.' }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

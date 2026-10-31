@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, field %}
+{% block title %}{{ heading }} — NMA{% endblock %}
+{% block body %}
+<div class="flex min-h-screen items-center justify-center bg-maroon-gradient p-6">
+  <div class="w-full max-w-sm rounded-2xl border border-[var(--gold)]/20 bg-[var(--cream)] p-8 shadow-elegant">
+    <div class="mb-5 flex h-11 w-11 items-center justify-center rounded-lg bg-gold-gradient">{{ icon('lock', 'h-5 w-5 text-[var(--maroon-deep)]') }}</div>
+    <h1 class="font-serif text-2xl text-[var(--maroon-deep)]">{{ heading }}</h1>
+    <form class="mt-6 space-y-4" method="post" action="{{ action }}">
+      {% if email_field %}{{ field('email', 'Academy email', 'email', 'email', 'academy@example.com') }}{% endif %}
+      {{ field('password', label, 'password', 'password', '••••••••') }}
+      <button type="submit" class="w-full rounded-md bg-[var(--maroon)] py-3.5 text-base font-semibold uppercase tracking-wider text-white transition-all hover:bg-[var(--maroon-deep)]">Sign in</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

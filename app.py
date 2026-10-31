@@ -6,9 +6,13 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from markupsafe import Markup, escape
 from lesson_content import LESSON_CONTENT, get_module_videos
 from supabase_client import get_supabase, get_supabase_video_url
+from datetime import datetime
+from werkzeug.security import check_password_hash
+from admin import bp as admin_bp
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "nma-secret-key-australia-2026")
+app.register_blueprint(admin_bp)
 
 STATS = [("users", "12,000+", "Students taught"), ("award", "25+ yrs", "Teaching excellence"),
          ("star", "4.9/5", "Average rating"), ("clock", "98%", "Complete their course")]
@@ -162,65 +166,11 @@ def enroll():
     return redirect(url_for("index") + "#enroll")
 
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if session.get("user"):
-        return redirect(url_for("portal_dashboard"))
-
-    if request.method == "POST":
-        full_name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip()
-        password = request.form.get("password", "")
-
-        if not email or not password:
-            flash("Please enter both email and password.", "error")
-            return render_template("register.html")
-
-        client = get_supabase()
-        if client:
-            try:
-                res = client.auth.sign_up({
-                    "email": email,
-                    "password": password,
-                    "options": {
-                        "data": {"full_name": full_name or email.split("@")[0].capitalize()}
-                    }
-                })
-                if res.user:
-                    user_name = full_name or email.split("@")[0].capitalize()
-                    session["user"] = {
-                        "id": res.user.id,
-                        "email": res.user.email,
-                        "name": user_name,
-                        "first": user_name.split()[0],
-                        "initials": "".join(p[0].upper() for p in user_name.split()[:2]),
-                        "level": "Conservatoire Level",
-                        "enrolled": "October 2026"
-                    }
-                    flash(f"Welcome to National Music Academy, {user_name.split()[0]}!", "success")
-                    return redirect(url_for("portal_dashboard"))
-                else:
-                    flash("Registration submitted! Please sign in.", "success")
-                    return redirect(url_for("login"))
-            except Exception as e:
-                flash(f"Supabase Sign-Up Error: {e}", "error")
-                return render_template("register.html")
-        else:
-            # Fallback local demo registration when keys are not yet configured
-            user_name = full_name or email.split("@")[0].capitalize()
-            session["user"] = {
-                "id": "demo-local-id",
-                "email": email,
-                "name": user_name,
-                "first": user_name.split()[0],
-                "initials": "".join(p[0].upper() for p in user_name.split()[:2]),
-                "level": "Conservatoire Level",
-                "enrolled": "October 2026"
-            }
-            flash(f"Demo Mode: Account created for {user_name} (Connect Supabase in .env for production auth)", "info")
-            return redirect(url_for("portal_dashboard"))
-
-    return render_template("register.html")
+def _enrolled(ts):
+    try:
+        return datetime.fromisoformat(ts.replace("Z", "+00:00")).strftime("%B %Y")
+    except Exception:
+        return ts[:7]
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -229,48 +179,36 @@ def login():
         return redirect(url_for("portal_dashboard"))
 
     if request.method == "POST":
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-
         client = get_supabase()
-        if client:
-            try:
-                res = client.auth.sign_in_with_password({
-                    "email": email,
-                    "password": password
-                })
-                if res.user:
-                    meta = getattr(res.user, "user_metadata", {}) or {}
-                    full_name = meta.get("full_name") or email.split("@")[0].capitalize()
-                    session["user"] = {
-                        "id": res.user.id,
-                        "email": res.user.email,
-                        "name": full_name,
-                        "first": full_name.split()[0],
-                        "initials": "".join(p[0].upper() for p in full_name.split()[:2]),
-                        "level": "Conservatoire Level",
-                        "enrolled": "October 2026"
-                    }
-                    flash(f"Welcome back, {full_name.split()[0]}!", "success")
-                    return redirect(url_for("portal_dashboard"))
-                else:
-                    flash("Invalid credentials. Please try again.", "error")
-            except Exception as e:
-                flash(f"Sign In Error: {e}", "error")
-        else:
-            # Demo fallback when Supabase keys are not yet provided
-            user_name = email.split("@")[0].capitalize() if "@" in email else "Eleanor Whitfield"
-            session["user"] = {
-                "id": "demo-id",
-                "email": email or "eleanor@example.com",
-                "name": user_name,
-                "first": user_name.split()[0],
-                "initials": "".join(p[0].upper() for p in user_name.split()[:2]),
-                "level": "Conservatoire Level",
-                "enrolled": "March 2026"
-            }
-            flash("Signed in using demo fallback mode. Configure Supabase in .env to use live cloud auth.", "info")
-            return redirect(url_for("portal_dashboard"))
+        if not client:
+            flash("Sign-in is unavailable: Supabase is not configured.", "error")
+            return render_template("login.html")
+        try:
+            rows = (client.table("students")
+                    .select("id,name,email,password_hash,created_at,academies(name,acronym)")
+                    .eq("email", email).limit(1).execute().data)
+        except Exception as e:
+            flash(f"Sign In Error: {e}", "error")
+            return render_template("login.html")
+
+        s = rows[0] if rows else None
+        if not s or not check_password_hash(s["password_hash"], password):
+            flash("Incorrect email or password.", "error")
+            return render_template("login.html")
+
+        name = s["name"]
+        academy = s.get("academies") or {}
+        session["user"] = {
+            "id": s["id"], "email": s["email"], "name": name,
+            "first": name.split()[0],
+            "initials": "".join(p[0].upper() for p in name.split()[:2]),
+            "level": academy.get("name", "Student"),
+            "enrolled": _enrolled(s["created_at"]),
+        }
+        flash(f"Welcome back, {name.split()[0]}!", "success")
+        return redirect(url_for("portal_dashboard"))
 
     return render_template("login.html")
 
