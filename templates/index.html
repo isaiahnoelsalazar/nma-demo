@@ -92,7 +92,7 @@
   <div><div class="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full border border-[var(--gold)]/30">{{ icon('music', 'h-7 w-7 text-[var(--gold)]') }}</div>
     <h2 class="font-serif text-4xl text-[var(--cream)] md:text-5xl">Your first lesson is free.<span class="block text-gradient-gold">Your musical journey starts today.</span></h2>
     <p class="mt-6 max-w-md text-lg leading-relaxed text-amber-50">Join thousands of Australians who chose National Music Academy to learn piano the right way. Enrol in 60 seconds — no card required.</p>
-    <ul class="mt-8 space-y-3">{% for t in ['First lesson completely free, no obligation', 'Personalised instructor matching within 24 hours', 'Beginners to advanced — all ages welcome'] %}
+    <ul class="mt-8 space-y-3 text-amber-50">{% for t in ['First lesson completely free, no obligation', 'Personalised instructor matching within 24 hours', 'Beginners to advanced — all ages welcome'] %}
       <li class="flex items-center gap-3 text-[var(--cream)]/90"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--gold)] text-xs font-bold text-[var(--maroon-deep)]">✓</span>{{ t }}</li>{% endfor %}</ul></div>
   <div class="mx-auto w-full max-w-md"><div class="rounded-2xl border border-[var(--gold)]/20 bg-[var(--cream)] p-6 shadow-elegant sm:p-8">{{ enroll_form('section') }}</div></div>
 </div></div></section>
